@@ -1,5 +1,6 @@
 {
-  "version": "17.1",
-  "url": "https://github.com/Warlinee/zima/releases/download/v17.1.0/ZIMA-Setup.exe",
-  "note": "update from inside the plugin"
+  "version": "18.0",
+  "url": "https://github.com/Warlinee/zima/releases/download/v18.0.0/ZIMA-Setup.exe",
+  "url_mac": "https://github.com/Warlinee/zima/releases/download/v18.0.0/ZIMA-Mac.pkg",
+  "note": "glide, craft, preset search, save, glass skin"
 }
