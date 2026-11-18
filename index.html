@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="fr" data-lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZIMA Manual</title>
+<style>
+/*
+  Plan de design
+  Sujet : le mode d'emploi d'un synthe VST pour la trap et la new wave, lu hors ligne par des beatmakers.
+  Matiere : celle du plugin. Gris perle, encre noire brillante, reflets irises. Une seule audace :
+  la goutte d'encre vivante du haut de page ; les sequences (installation, mise a jour) coulent de goutte en goutte.
+  Mise en page : bandeau d'ouverture en deux colonnes, puis sommaire colle a gauche et colonne de lecture a droite,
+  alignee a gauche, 68 caracteres au plus par ligne.
+*/
+:root {
+  --pearl: #e6e8ed;      /* fond, le chassis du plugin */
+  --paper: #f3f4f7;      /* surfaces de lecture */
+  --ink: #090a0e;        /* l'encre de la matiere */
+  --text: #2b2e36;
+  --mute: #6a7080;
+  --groove: rgba(120, 128, 146, .28);
+  --hi: rgba(255, 255, 255, .92);
+  --shade: rgba(148, 156, 174, .5);
+  --blue: #2f5fe8;       /* liens et focus, comme les anneaux des potards */
+  --iris-a: #9f86ff;
+  --iris-b: #6fd2ff;
+  --display: "Bahnschrift", "DIN Alternate", "Avenir Next Condensed", "Arial Narrow", sans-serif;
+  --body: "Segoe UI Variable Text", "Segoe UI", "Avenir Next", system-ui, sans-serif;
+  --code: "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: var(--pearl); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--pearl); color: var(--text);
+  font: 16.5px/1.68 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+html[data-lang="fr"] [lang="en"]:not(html), html[data-lang="en"] [lang="fr"]:not(html) { display: none !important; }
+a { color: var(--blue); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
+.wrap {
+  max-width: 1160px; margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- ouverture : le seul moment spectaculaire ---------- */
+.hero { padding-block: 34px 56px; position: relative; overflow: hidden; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); align-items: center; gap: 24px; }
+.hero-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 44px; gap: 16px; }
+.mark { height: 30px; width: auto; display: block; }
+.mark path { fill: none; stroke: var(--ink); stroke-width: 6.4; stroke-linecap: round; stroke-linejoin: round; }
+.mark circle { fill: var(--ink); }
+.switch { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--paper);
+  box-shadow: inset 2px 2px 5px var(--shade), inset -2px -2px 5px var(--hi); }
+.switch button { border: 0; background: none; cursor: pointer; padding: 7px 16px; border-radius: 999px;
+  font: 600 14px var(--display); color: var(--mute); }
+.switch button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.hero h1 {
+  margin: 0 0 22px; font: 700 clamp(44px, 7.4vw, 92px)/.92 var(--display); font-stretch: 75%;
+  color: var(--ink); letter-spacing: -.01em; text-wrap: balance;
+}
+.hero .lead { margin: 0 0 26px; max-width: 46ch; font-size: 18px; color: var(--text); }
+.hero .ver { margin: 0; font-size: 14.5px; color: var(--mute); }
+.hero .ver b { color: var(--ink); font-weight: 600; }
+.stage { position: relative; aspect-ratio: 1; width: min(100%, 440px); justify-self: end; }
+.halo {
+  position: absolute; inset: 6%; border-radius: 50%;
+  background: conic-gradient(from 40deg, var(--iris-a), #ffe4c7, var(--iris-b), #c6b8ff, var(--iris-a));
+  filter: blur(34px) saturate(1.3); opacity: .55;
+}
+.ink {
+  position: absolute; inset: 17%;
+  background:
+    radial-gradient(circle at 31% 26%, rgba(255,255,255,.95) 0 3%, transparent 9%),
+    radial-gradient(ellipse at 36% 30%, rgba(255,255,255,.42), transparent 30%),
+    radial-gradient(ellipse at 72% 74%, rgba(111, 140, 255, .55), transparent 34%),
+    radial-gradient(ellipse at 22% 78%, rgba(159, 134, 255, .35), transparent 30%),
+    radial-gradient(circle at 50% 50%, #1b1c24 0%, #07080b 62%);
+  border-radius: 46% 54% 58% 42% / 52% 44% 56% 48%;
+  box-shadow: inset -18px -24px 40px rgba(0,0,0,.6), inset 10px 14px 30px rgba(255,255,255,.08);
+  animation: melt 9s ease-in-out infinite alternate;
+}
+.drip-hang {
+  position: absolute; left: 47%; top: 78%; width: 9%; height: 15%;
+  background: linear-gradient(180deg, #07080b, #14151c);
+  border-radius: 40% 40% 50% 50% / 30% 30% 70% 70%;
+  animation: hang 4.5s ease-in-out infinite;
+  transform-origin: top center;
+}
+.puddle { position: absolute; left: 22%; right: 22%; bottom: 2%; height: 7%; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(40, 44, 58, .38), transparent 70%); }
+@keyframes melt {
+  0% { border-radius: 46% 54% 58% 42% / 52% 44% 56% 48%; transform: rotate(-4deg) scale(1); }
+  50% { border-radius: 58% 42% 44% 56% / 44% 58% 42% 56%; transform: rotate(3deg) scale(1.03, .98); }
+  100% { border-radius: 40% 60% 52% 48% / 58% 40% 60% 42%; transform: rotate(6deg) scale(.98, 1.03); }
+}
+@keyframes hang { 0%, 100% { transform: scaleY(.55); } 60% { transform: scaleY(1.15); } 80% { transform: scaleY(.4); } }
+@media (prefers-reduced-motion: reduce) { .ink, .drip-hang { animation: none; } }
+
+/* ---------- corps ---------- */
+.body { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 56px; padding-bottom: 96px; }
+.toc { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.toc a {
+  display: block; padding: 6px 12px; border-radius: 10px; text-decoration: none;
+  font: 500 15px/1.35 var(--display); color: var(--mute);
+}
+.toc a:hover { color: var(--ink); background: var(--paper); }
+.toc a.here { color: var(--ink); background: var(--paper); box-shadow: -2px -2px 5px var(--hi), 2px 3px 7px var(--shade); }
+
+main { min-width: 0; max-width: 760px; }
+section.chap { padding-top: 12px; margin-bottom: 64px; scroll-margin-top: 20px; }
+h2 {
+  display: flex; align-items: center; gap: 18px; margin: 0 0 22px;
+  font: 700 clamp(30px, 4vw, 40px)/1.05 var(--display); font-stretch: 85%; color: var(--ink); text-wrap: balance;
+}
+h2::after { content: ""; flex: 1; min-width: 40px; height: 3px; border-top: 1px solid var(--groove); border-bottom: 1px solid var(--hi); }
+h3 { margin: 34px 0 10px; font: 600 21px/1.25 var(--display); color: var(--ink); }
+p, li { max-width: 68ch; }
+p { margin: 0 0 14px; }
+strong, b { color: var(--ink); font-weight: 600; }
+.ctl { font: 600 15.5px var(--display); color: var(--ink); white-space: nowrap; }
+code { font: 14px var(--code); background: var(--paper); padding: 2px 7px; border-radius: 6px; overflow-wrap: anywhere;
+  box-shadow: inset 1px 1px 2px var(--shade), inset -1px -1px 2px var(--hi); }
+kbd {
+  display: inline-block; min-width: 1.9em; padding: 2px 8px; border-radius: 8px; text-align: center;
+  font: 600 14px var(--display); color: var(--ink); background: linear-gradient(145deg, #fbfcfd, #dadde4);
+  box-shadow: -2px -2px 4px var(--hi), 2px 3px 6px var(--shade);
+}
+ul.plain { padding-left: 20px; margin: 0 0 14px; }
+ul.plain li { margin: 6px 0; }
+ul.plain li::marker { color: var(--mute); }
+
+/* ---------- les sequences : un filet d'encre de goutte en goutte ---------- */
+ol.flow { list-style: none; margin: 8px 0 26px; padding: 0; counter-reset: step; position: relative; }
+ol.flow::before { content: ""; position: absolute; left: 17px; top: 18px; bottom: 22px; width: 3px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--ink), #2a2c36 70%, rgba(9,10,14,0)); }
+ol.flow > li { position: relative; padding: 2px 0 20px 60px; counter-increment: step; }
+ol.flow > li::before {
+  content: ""; position: absolute; left: 3px; top: 0; width: 32px; height: 32px;
+  border-radius: 0 50% 50% 50%; transform: rotate(45deg);
+  background: radial-gradient(circle at 34% 30%, #4a4d5c, var(--ink) 58%);
+  box-shadow: 2px 4px 8px rgba(9,10,14,.35);
+}
+ol.flow > li::after {
+  content: counter(step); position: absolute; left: 3px; top: 0; width: 32px; height: 32px;
+  display: grid; place-items: center; font: 700 15px var(--display); color: #fff;
+}
+ol.flow > li > b:first-child { display: block; font: 600 19px/1.3 var(--display); color: var(--ink); margin-bottom: 4px; }
+ol.flow p { margin-bottom: 8px; }
+
+/* ---------- reglages : une liste gravee, pas un tableau ---------- */
+dl.controls { margin: 6px 0 22px; }
+dl.controls > div {
+  display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 4px 24px; padding: 13px 0;
+  border-top: 1px solid var(--groove); box-shadow: inset 0 1px 0 var(--hi);
+}
+dl.controls > div:last-child { border-bottom: 1px solid var(--groove); }
+dl.controls dt { font: 600 17px/1.35 var(--display); color: var(--ink); }
+dl.controls dt small { display: block; font: 400 13.5px var(--body); color: var(--mute); margin-top: 2px; }
+dl.controls dd { margin: 0; }
+
+/* ---------- notes : les bulles du plugin ---------- */
+.bubble {
+  margin: 18px 0 24px; padding: 18px 22px; max-width: 68ch;
+  background: var(--paper);
+  border-radius: 30px 36px 28px 40px / 36px 28px 40px 30px;
+  box-shadow: -5px -5px 12px var(--hi), 6px 7px 16px var(--shade);
+}
+.bubble > b:first-child { display: block; font: 600 18px var(--display); color: var(--ink); margin-bottom: 4px; }
+.bubble p:last-child { margin-bottom: 0; }
+.bubble.warn > b:first-child::before { content: ""; display: inline-block; width: 11px; height: 11px; margin-right: 9px;
+  border-radius: 0 50% 50% 50%; transform: rotate(45deg) translateY(-1px); background: var(--ink); vertical-align: middle; }
+
+/* ---------- schemas ---------- */
+figure { margin: 18px 0 26px; }
+figure svg { display: block; width: 100%; height: auto; }
+figcaption { font-size: 14.5px; color: var(--mute); margin-top: 10px; max-width: 68ch; }
+.map .zone { fill: var(--paper); stroke: var(--groove); }
+.map .bay { fill: var(--ink); }
+.map text { font: 600 13px var(--display); fill: var(--ink); }
+.map text.light { fill: #e9eaf0; }
+.map .num { fill: var(--ink); }
+.map .numtxt { font: 700 12px var(--display); fill: #fff; }
+.kb .k { fill: #fbfcfd; stroke: var(--groove); }
+.kb .k.blk { fill: var(--ink); stroke: none; }
+.kb text { font: 600 13px var(--display); fill: var(--ink); }
+.kb text.on-dark { fill: #fff; }
+.kb text.lbl { font: 500 13px var(--display); fill: var(--mute); }
+
+/* ---------- correspondance de la carte ---------- */
+ol.legend { list-style: none; margin: 0 0 8px; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 28px; }
+ol.legend li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+ol.legend li > i { font: 700 13px var(--display); font-style: normal; color: #fff; background: var(--ink); width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; }
+ol.legend b { font: 600 16px var(--display); }
+
+/* ---------- depannage : question puis reponse ---------- */
+.faq > div { padding: 16px 0; border-top: 1px solid var(--groove); box-shadow: inset 0 1px 0 var(--hi); }
+.faq > div:last-child { border-bottom: 1px solid var(--groove); }
+.faq h4 { margin: 0 0 4px; font: 600 18px/1.3 var(--display); color: var(--ink); }
+.faq p { margin: 0; }
+
+footer { padding-block: 0 56px; color: var(--mute); font-size: 14.5px; }
+footer .mark { height: 18px; opacity: .55; margin-bottom: 8px; }
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .stage { width: min(78%, 320px); justify-self: center; order: -1; margin-bottom: 8px; }
+  .body { grid-template-columns: 1fr; gap: 28px; }
+  .toc { position: static; max-height: none; background: var(--paper); border-radius: 22px; padding: 12px; }
+  .toc ol { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+}
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+  dl.controls > div { grid-template-columns: 1fr; }
+  ol.legend { grid-template-columns: 1fr; }
+  .hero-top { margin-bottom: 26px; }
+}
+@media print {
+  .toc, .switch, .stage { display: none; }
+  .body { grid-template-columns: 1fr; }
+  html, body { background: #fff; }
+  .bubble { box-shadow: none; border: 1px solid #ccc; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <svg class="mark" viewBox="0 0 120 34" role="img" aria-label="ZIMA"><path d="M5 7 H25 L5 27 H25"/><path d="M39 7 V27"/><path d="M53 27 V7 L65 21 L77 7 V27"/><path d="M91 27 L102 7 L113 27"/><circle cx="102" cy="23" r="3.4"/></svg>
+      <div class="switch" role="group" aria-label="Langue / Language">
+        <button type="button" data-set-lang="fr" aria-pressed="true">Français</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">English</button>
+      </div>
+    </div>
+    <div class="hero-grid">
+      <div>
+        <h1 lang="fr">Installer ZIMA, puis en tirer des sons</h1>
+        <h1 lang="en">Install ZIMA, then shape sounds with it</h1>
+        <p class="lead" lang="fr">Ce guide va du téléchargement à la désinstallation, en passant par chaque réglage du synthé. Il fonctionne sans connexion.</p>
+        <p class="lead" lang="en">This guide goes from download to uninstall, through every control of the synth. It works offline.</p>
+        <p class="ver" lang="fr">Pour <b>ZIMA v17.1</b>, Windows 10 et 11, format VST3.</p>
+        <p class="ver" lang="en">For <b>ZIMA v17.1</b>, Windows 10 and 11, VST3 format.</p>
+      </div>
+      <div class="stage" aria-hidden="true">
+        <div class="halo"></div>
+        <div class="puddle"></div>
+        <div class="drip-hang"></div>
+        <div class="ink"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap body">
+  <nav class="toc" aria-label="Sommaire / Contents">
+    <ol>
+      <li><a href="#installation"><span lang="fr">Télécharger et installer</span><span lang="en">Download and install</span></a></li>
+      <li><a href="#premiere"><span lang="fr">Première ouverture</span><span lang="en">First launch</span></a></li>
+      <li><a href="#apercu"><span lang="fr">La fenêtre en un coup d'œil</span><span lang="en">The window at a glance</span></a></li>
+      <li><a href="#gestes"><span lang="fr">Gestes de base</span><span lang="en">Basic gestures</span></a></li>
+      <li><a href="#jouer"><span lang="fr">Jouer</span><span lang="en">Playing</span></a></li>
+      <li><a href="#oscillateurs"><span lang="fr">Oscillateurs</span><span lang="en">Oscillators</span></a></li>
+      <li><a href="#harmoniques"><span lang="fr">Harmoniques et matière</span><span lang="en">Harmonics and matter</span></a></li>
+      <li><a href="#soundcore"><span lang="fr">Sound core et presets</span><span lang="en">Sound core and presets</span></a></li>
+      <li><a href="#creation"><span lang="fr">Vos créations</span><span lang="en">Your creations</span></a></li>
+      <li><a href="#oneshots"><span lang="fr">One-shots</span><span lang="en">One-shots</span></a></li>
+      <li><a href="#ambiance"><span lang="fr">Ambiance</span><span lang="en">Ambience</span></a></li>
+      <li><a href="#filtre"><span lang="fr">Filtre et enveloppe</span><span lang="en">Filter and envelope</span></a></li>
+      <li><a href="#effets"><span lang="fr">Effets</span><span lang="en">Effects</span></a></li>
+      <li><a href="#maj"><span lang="fr">Mettre à jour, désinstaller</span><span lang="en">Update, uninstall</span></a></li>
+      <li><a href="#depannage"><span lang="fr">Dépannage</span><span lang="en">Troubleshooting</span></a></li>
+      <li><a href="#limites"><span lang="fr">Limites connues</span><span lang="en">Known limits</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section class="chap" id="installation">
+      <h2 lang="fr">Télécharger et installer</h2><h2 lang="en">Download and install</h2>
+      <div lang="fr">
+        <p>ZIMA est un plugin VST3 pour Windows 10 et 11 en 64 bits. Il fonctionne dans FL Studio et dans tout logiciel compatible VST3.</p>
+        <ol class="flow">
+          <li><b>Télécharger</b><p>Récupérez <code>ZIMA-Setup.exe</code> depuis le lien qui vous a été envoyé, et enregistrez-le, par exemple dans Téléchargements.</p></li>
+          <li><b>Passer l'avertissement de Windows</b><p>ZIMA n'a pas de certificat de signature payant, donc Windows peut afficher « Windows a protégé votre ordinateur ». Cliquez sur <span class="ctl">Informations complémentaires</span>, puis sur <span class="ctl">Exécuter quand même</span>.</p></li>
+          <li><b>Autoriser l'installation</b><p>Windows demande l'autorisation d'apporter des modifications : répondez <span class="ctl">Oui</span>. L'installeur en a besoin pour écrire dans le dossier des plugins.</p></li>
+          <li><b>Suivre l'assistant</b><p>L'écran de bienvenue indique la version qui va être installée, et celle déjà présente s'il y en a une. Cliquez sur <span class="ctl">Continuer</span>, gardez le dossier proposé, <code>C:\Program Files\Common Files\VST3</code>, puis cliquez sur <span class="ctl">Installer</span>.</p></li>
+          <li><b>Terminer</b><p>ZIMA est installé. Le bouton <span class="ctl">Mode d'emploi</span> rouvre ce guide, qui est aussi copié dans <code>C:\Program Files\ZIMA</code>.</p></li>
+        </ol>
+        <div class="bubble"><b>FL Studio est ouvert pendant l'installation ?</b><p>Aucun problème : l'installeur le signale, et la nouvelle version sera utilisée au prochain chargement de ZIMA. Pour être tranquille, fermez FL Studio avant.</p></div>
+      </div>
+      <div lang="en">
+        <p>ZIMA is a VST3 plugin for 64-bit Windows 10 and 11. It works in FL Studio and in any VST3 host.</p>
+        <ol class="flow">
+          <li><b>Download</b><p>Get <code>ZIMA-Setup.exe</code> from the link you were sent, and save it, for example in Downloads.</p></li>
+          <li><b>Get past the Windows warning</b><p>ZIMA doesn't have a paid code-signing certificate, so Windows may show "Windows protected your PC". Click <span class="ctl">More info</span>, then <span class="ctl">Run anyway</span>.</p></li>
+          <li><b>Allow the installation</b><p>Windows asks for permission to make changes: answer <span class="ctl">Yes</span>. The installer needs it to write to the plugins folder.</p></li>
+          <li><b>Follow the assistant</b><p>The welcome screen shows the version about to be installed, and the one already present if any. Click <span class="ctl">Continue</span>, keep the suggested folder, <code>C:\Program Files\Common Files\VST3</code>, then click <span class="ctl">Install</span>.</p></li>
+          <li><b>Finish</b><p>ZIMA is installed. The <span class="ctl">User manual</span> button reopens this guide, which is also copied to <code>C:\Program Files\ZIMA</code>.</p></li>
+        </ol>
+        <div class="bubble"><b>FL Studio open during installation?</b><p>That's fine: the installer tells you, and the new version is used the next time ZIMA loads. To be safe, close FL Studio first.</p></div>
+      </div>
+    </section>
+
+    <section class="chap" id="premiere">
+      <h2 lang="fr">Première ouverture dans FL Studio</h2><h2 lang="en">First launch in FL Studio</h2>
+      <div lang="fr">
+        <ol class="flow">
+          <li><b>Chercher les nouveaux plugins</b><p>Ouvrez <span class="ctl">Options</span> &gt; <span class="ctl">Manage plugins</span>, cliquez sur <span class="ctl">Find installed plugins</span> et attendez la fin de la recherche.</p></li>
+          <li><b>Mettre ZIMA en favori</b><p>ZIMA apparaît parmi les générateurs VST3. Cochez son étoile pour l'avoir dans la liste rapide.</p></li>
+          <li><b>L'ajouter au projet</b><p>Dans le Channel Rack, cliquez sur <span class="ctl">+</span> et choisissez <strong>ZIMA</strong>.</p></li>
+          <li><b>Vérifier et jouer</b><p>La fenêtre de ZIMA s'ouvre avec <strong>v17.1</strong> sous le logo. Jouez une note.</p></li>
+        </ol>
+        <p>Les noms des menus peuvent varier un peu selon votre version de FL Studio. Si ZIMA n'apparaît pas, vérifiez qu'il se trouve dans <code>C:\Program Files\Common Files\VST3</code> et relancez la recherche.</p>
+      </div>
+      <div lang="en">
+        <ol class="flow">
+          <li><b>Scan for new plugins</b><p>Open <span class="ctl">Options</span> &gt; <span class="ctl">Manage plugins</span>, click <span class="ctl">Find installed plugins</span> and wait for the scan to finish.</p></li>
+          <li><b>Make ZIMA a favourite</b><p>ZIMA appears among the VST3 generators. Tick its star to add it to the quick list.</p></li>
+          <li><b>Add it to your project</b><p>In the Channel Rack, click <span class="ctl">+</span> and pick <strong>ZIMA</strong>.</p></li>
+          <li><b>Check and play</b><p>The ZIMA window opens with <strong>v17.1</strong> under the logo. Play a note.</p></li>
+        </ol>
+        <p>Menu names may differ slightly between FL Studio versions. If ZIMA doesn't show up, check that it is in <code>C:\Program Files\Common Files\VST3</code> and scan again.</p>
+      </div>
+    </section>
+
+    <section class="chap" id="apercu">
+      <h2 lang="fr">La fenêtre en un coup d'œil</h2><h2 lang="en">The window at a glance</h2>
+      <figure>
+        <svg class="map" viewBox="0 0 960 470" role="img" aria-label="Plan de la fenêtre ZIMA / ZIMA window layout">
+          <rect class="zone" x="0" y="0" width="960" height="44" rx="14"/>
+          <text x="46" y="28">ZIMA</text><text x="410" y="28">mono / poly</text><text x="800" y="28">matter</text>
+          <rect class="zone" x="0" y="56" width="220" height="190" rx="26"/><text x="46" y="88">oscillators</text>
+          <rect class="zone" x="0" y="256" width="220" height="70" rx="22"/><text x="46" y="288">harmonics</text>
+          <rect class="zone" x="232" y="56" width="236" height="150" rx="26"/><text x="278" y="88">sound core</text>
+          <rect class="zone" x="480" y="56" width="236" height="150" rx="26"/><text x="526" y="88">one-shots</text>
+          <rect class="zone" x="232" y="216" width="484" height="110" rx="24"/><text x="278" y="248">ambience</text>
+          <rect class="zone" x="728" y="56" width="232" height="130" rx="26"/><text x="774" y="88">filter</text>
+          <rect class="zone" x="728" y="196" width="232" height="130" rx="26"/><text x="774" y="228">envelope</text>
+          <rect class="bay" x="0" y="338" width="960" height="76" rx="22"/><text class="light" x="46" y="372">effects</text>
+          <text class="light" x="230" y="372">reverb · delay · chorus · flanger · vinyl · ear candy</text>
+          <rect class="zone" x="0" y="424" width="960" height="46" rx="14"/><text x="46" y="452">stop · keys</text>
+          <g>
+            <circle class="num" cx="24" cy="22" r="11"/><text class="numtxt" x="24" y="26" text-anchor="middle">1</text>
+            <circle class="num" cx="388" cy="22" r="11"/><text class="numtxt" x="388" y="26" text-anchor="middle">2</text>
+            <circle class="num" cx="778" cy="22" r="11"/><text class="numtxt" x="778" y="26" text-anchor="middle">3</text>
+            <circle class="num" cx="24" cy="84" r="11"/><text class="numtxt" x="24" y="88" text-anchor="middle">4</text>
+            <circle class="num" cx="24" cy="284" r="11"/><text class="numtxt" x="24" y="288" text-anchor="middle">5</text>
+            <circle class="num" cx="256" cy="84" r="11"/><text class="numtxt" x="256" y="88" text-anchor="middle">6</text>
+            <circle class="num" cx="504" cy="84" r="11"/><text class="numtxt" x="504" y="88" text-anchor="middle">7</text>
+            <circle class="num" cx="256" cy="244" r="11"/><text class="numtxt" x="256" y="248" text-anchor="middle">8</text>
+            <circle class="num" cx="752" cy="84" r="11"/><text class="numtxt" x="752" y="88" text-anchor="middle">9</text>
+            <circle class="num" cx="752" cy="224" r="11"/><text class="numtxt" x="752" y="228" text-anchor="middle">10</text>
+            <circle cx="24" cy="368" r="11" fill="#fff"/><text x="24" y="372" text-anchor="middle" style="font:700 12px var(--display)">11</text>
+            <circle class="num" cx="24" cy="448" r="11"/><text class="numtxt" x="24" y="452" text-anchor="middle">12</text>
+          </g>
+        </svg>
+        <figcaption lang="fr">En fenêtre large. Quand la fenêtre est presque carrée, les mêmes zones s'empilent autrement.</figcaption>
+        <figcaption lang="en">Wide window. When the window is close to square, the same areas stack differently.</figcaption>
+      </figure>
+      <ol class="legend" lang="fr">
+        <li><i>1</i><span><b>Logo</b> : un clic ouvre le panneau de diagnostic.</span></li>
+        <li><i>2</i><span><b>mono / poly</b> : une note à la fois, ou jusqu'à huit.</span></li>
+        <li><i>3</i><span><b>matter</b> : la couleur harmonique du son.</span></li>
+        <li><i>4</i><span><b>oscillators</b> : les trois sources du son.</span></li>
+        <li><i>5</i><span><b>harmonics</b> : FM, partiels, désaccord.</span></li>
+        <li><i>6</i><span><b>sound core</b> : volume, presets et créations.</span></li>
+        <li><i>7</i><span><b>one-shots</b> : deux pistes de samples.</span></li>
+        <li><i>8</i><span><b>ambience</b> : vent, train, eau, forêt, oiseaux.</span></li>
+        <li><i>9</i><span><b>filter</b> : passe-bas ou passe-haut.</span></li>
+        <li><i>10</i><span><b>envelope</b> : la forme de chaque note.</span></li>
+        <li><i>11</i><span><b>effects</b> : six effets et un interrupteur.</span></li>
+        <li><i>12</i><span><b>stop et clavier</b> : jouer, ou tout couper.</span></li>
+      </ol>
+      <ol class="legend" lang="en">
+        <li><i>1</i><span><b>Logo</b>: click it to open the diagnostic panel.</span></li>
+        <li><i>2</i><span><b>mono / poly</b>: one note at a time, or up to eight.</span></li>
+        <li><i>3</i><span><b>matter</b>: the harmonic colour of the sound.</span></li>
+        <li><i>4</i><span><b>oscillators</b>: the three sound sources.</span></li>
+        <li><i>5</i><span><b>harmonics</b>: FM, partials, detune.</span></li>
+        <li><i>6</i><span><b>sound core</b>: volume, presets and creations.</span></li>
+        <li><i>7</i><span><b>one-shots</b>: two sample tracks.</span></li>
+        <li><i>8</i><span><b>ambience</b>: wind, train, water, forest, birds.</span></li>
+        <li><i>9</i><span><b>filter</b>: low-pass or high-pass.</span></li>
+        <li><i>10</i><span><b>envelope</b>: the shape of each note.</span></li>
+        <li><i>11</i><span><b>effects</b>: six effects and a switch.</span></li>
+        <li><i>12</i><span><b>stop and keys</b>: play, or cut everything.</span></li>
+      </ol>
+    </section>
+
+    <section class="chap" id="gestes">
+      <h2 lang="fr">Gestes de base</h2><h2 lang="en">Basic gestures</h2>
+      <dl class="controls" lang="fr">
+        <div><dt>Glisser</dt><dd>Vers le haut ou le bas : règle un potard, un écran d'effet, le sound core ou le niveau d'une piste one-shot.</dd></div>
+        <div><dt><kbd>Maj</kbd> + glisser</dt><dd>Réglage fin, cinq fois plus précis.</dd></div>
+        <div><dt>Double-clic</dt><dd>Remet le réglage à sa valeur de départ.</dd></div>
+        <div><dt>Clic</dt><dd>Boutons, formes d'onde, interrupteurs, cases à cocher.</dd></div>
+      </dl>
+      <dl class="controls" lang="en">
+        <div><dt>Drag</dt><dd>Up or down: sets a knob, an effect screen, the sound core or a one-shot track level.</dd></div>
+        <div><dt><kbd>Shift</kbd> + drag</dt><dd>Fine adjustment, five times more precise.</dd></div>
+        <div><dt>Double-click</dt><dd>Resets the control to its default value.</dd></div>
+        <div><dt>Click</dt><dd>Buttons, waveforms, switches, checkboxes.</dd></div>
+      </dl>
+      <p lang="fr">Tous les réglages sont automatisables dans FL Studio et enregistrés avec votre projet.</p>
+      <p lang="en">Every control can be automated in FL Studio and is saved with your project.</p>
+    </section>
+
+    <section class="chap" id="jouer">
+      <h2 lang="fr">Jouer</h2><h2 lang="en">Playing</h2>
+      <p lang="fr">ZIMA joue les notes du piano roll, d'un clavier MIDI, du clavier à l'écran ou du clavier de l'ordinateur. Les touches à l'écran s'allument quand une note arrive.</p>
+      <p lang="en">ZIMA plays notes from the piano roll, a MIDI keyboard, the on-screen keyboard or your computer keyboard. On-screen keys light up when a note comes in.</p>
+      <h3 lang="fr">Avec le clavier de l'ordinateur</h3><h3 lang="en">With the computer keyboard</h3>
+      <p lang="fr">Quand la fenêtre de ZIMA est active, c'est elle qui reçoit les touches. Elle reprend la disposition du clavier de saisie de FL Studio, repérée par la position des touches : c'est donc la même sur PC et sur Mac.</p>
+      <p lang="en">When the ZIMA window is active, it receives the keys. It uses FL Studio's typing-keyboard layout, based on key positions, so it's the same on PC and Mac.</p>
+      <figure>
+        <svg class="kb" lang="fr" viewBox="0 0 720 210" role="img" aria-label="Correspondance du clavier AZERTY">
+          <text class="lbl" x="0" y="16">do4 → mi5</text><g id="row-up-fr"></g>
+          <text class="lbl" x="0" y="122">do3 → mi4</text><g id="row-low-fr"></g>
+        </svg>
+        <svg class="kb" lang="en" viewBox="0 0 720 210" role="img" aria-label="QWERTY keyboard mapping">
+          <text class="lbl" x="0" y="16">C4 → E5</text><g id="row-up"></g>
+          <text class="lbl" x="0" y="122">C3 → E4</text><g id="row-low"></g>
+        </svg>
+        <figcaption lang="fr">Clavier AZERTY ; sur Mac, la touche <kbd>-</kbd> est <kbd>§</kbd>. Les touches foncées jouent les notes noires. Les touches absentes du schéma, comme <kbd>1</kbd>, <kbd>4</kbd>, <kbd>8</kbd>, <kbd>Q</kbd>, <kbd>F</kbd> ou <kbd>K</kbd>, restent muettes : elles tombent là où un piano n'a pas de touche noire, entre mi et fa et entre si et do. D'autres plugins utilisent la disposition « clavier musical » de Logic et Ableton, où <kbd>F</kbd> joue un fa.</figcaption>
+        <figcaption lang="en">QWERTY keyboard. Dark keys play the black notes. Keys not shown, such as <kbd>1</kbd>, <kbd>4</kbd>, <kbd>8</kbd>, <kbd>A</kbd>, <kbd>F</kbd> or <kbd>K</kbd>, stay silent: they sit where a piano has no black key, between E and F and between B and C. Other plugins use the Logic / Ableton "musical typing" layout, where <kbd>F</kbd> plays an F.</figcaption>
+      </figure>
+      <div class="bubble" lang="fr"><b>Le bouton stop</b><p>À gauche du clavier à l'écran, il coupe toutes les notes, même une note restée bloquée. Si ZIMA perd le focus pendant qu'une touche est enfoncée, la note est aussi relâchée toute seule.</p></div>
+      <div class="bubble" lang="en"><b>The stop button</b><p>Left of the on-screen keyboard, it stops every note, even a stuck one. If ZIMA loses focus while a key is held, the note is released on its own too.</p></div>
+    </section>
+
+    <section class="chap" id="oscillateurs">
+      <h2 lang="fr">Oscillateurs</h2><h2 lang="en">Oscillators</h2>
+      <p lang="fr">Trois oscillateurs se mélangent ; la courbe en haut du panneau montre la forme d'onde obtenue.</p>
+      <p lang="en">Three oscillators are mixed; the curve at the top of the panel shows the resulting waveform.</p>
+      <dl class="controls" lang="fr">
+        <div><dt>Forme d'onde<small>sinus, dent de scie, carré, triangle</small></dt><dd>Le timbre de base, du plus doux (sinus) au plus brillant (dent de scie).</dd></div>
+        <div><dt>octave<small>−3 à +3</small></dt><dd>Décale l'oscillateur par octaves. Le troisième part une octave en dessous.</dd></div>
+        <div><dt>level<small>0 à 100 %</small></dt><dd>Volume de l'oscillateur dans le mélange.</dd></div>
+        <div><dt>mono / poly<small>en haut de la fenêtre</small></dt><dd>En mono, une note chasse la précédente, idéal pour les basses et les leads. En poly, jusqu'à huit notes en même temps, pour les accords.</dd></div>
+      </dl>
+      <dl class="controls" lang="en">
+        <div><dt>Waveform<small>sine, saw, square, triangle</small></dt><dd>The basic tone, from soft (sine) to bright (saw).</dd></div>
+        <div><dt>octave<small>−3 to +3</small></dt><dd>Shifts the oscillator by octaves. The third one starts an octave down.</dd></div>
+        <div><dt>level<small>0 to 100%</small></dt><dd>The oscillator's volume in the mix.</dd></div>
+        <div><dt>mono / poly<small>top of the window</small></dt><dd>In mono, a new note replaces the previous one, ideal for basses and leads. In poly, up to eight notes at once, for chords.</dd></div>
+      </dl>
+    </section>
+
+    <section class="chap" id="harmoniques">
+      <h2 lang="fr">Harmoniques et matière</h2><h2 lang="en">Harmonics and matter</h2>
+      <dl class="controls" lang="fr">
+        <div><dt>fm</dt><dd>Le deuxième oscillateur module le premier : un son métallique, plus agressif quand on monte.</dd></div>
+        <div><dt>harmonics</dt><dd>Ajoute les partiels de la matière choisie.</dd></div>
+        <div><dt>inharmonic</dt><dd>Désaccorde ces partiels : cloches, verre, sons étranges.</dd></div>
+        <div><dt>detune<small>±50 centièmes</small></dt><dd>Désaccorde le deuxième oscillateur pour épaissir le son.</dd></div>
+        <div><dt>matter<small>en haut à droite</small></dt><dd>La famille de partiels ajoutés par <span class="ctl">harmonics</span> : pure, metal, glass, dark, organic, ether, digital, dissonant. Sans harmoniques, la matière ne s'entend pas.</dd></div>
+      </dl>
+      <dl class="controls" lang="en">
+        <div><dt>fm</dt><dd>Oscillator 2 modulates oscillator 1: a metallic tone that gets harsher as you turn it up.</dd></div>
+        <div><dt>harmonics</dt><dd>Adds the partials of the selected matter.</dd></div>
+        <div><dt>inharmonic</dt><dd>Detunes those partials: bells, glass, strange tones.</dd></div>
+        <div><dt>detune<small>±50 cents</small></dt><dd>Detunes oscillator 2 for a thicker sound.</dd></div>
+        <div><dt>matter<small>top right</small></dt><dd>The family of partials added by <span class="ctl">harmonics</span>: pure, metal, glass, dark, organic, ether, digital, dissonant. With harmonics at zero, the matter isn't heard.</dd></div>
+      </dl>
+    </section>
+
+    <section class="chap" id="soundcore">
+      <h2 lang="fr">Sound core et presets</h2><h2 lang="en">Sound core and presets</h2>
+      <div lang="fr">
+        <p>La matière noire au centre est le <strong>volume général</strong> : glissez-la vers le haut ou le bas. Elle s'agite quand des notes jouent.</p>
+        <h3>Choisir un preset</h3>
+        <p>Cliquez sur la matière ou sur <span class="ctl">presets</span>, choisissez une catégorie (key, polysynth, synth bass, pluck, lead, ambient, dmv, ear candy ou creation), puis un preset. Son nom s'affiche en bas à gauche du sound core, et un message le confirme en haut de la fenêtre.</p>
+        <p>Un preset d'usine règle le synthé et les effets. Il ne touche ni au volume général, ni à vos one-shots, ni à l'ambiance. Changer de preset coupe les notes en cours et vide les échos de l'ancien son, pour éviter les sons parasites.</p>
+      </div>
+      <div lang="en">
+        <p>The black matter in the centre is the <strong>master volume</strong>: drag it up or down. It moves when notes play.</p>
+        <h3>Choosing a preset</h3>
+        <p>Click the matter or <span class="ctl">presets</span>, pick a category (key, polysynth, synth bass, pluck, lead, ambient, dmv, ear candy or creation), then a preset. Its name shows at the bottom left of the sound core, and a message confirms it at the top of the window.</p>
+        <p>A factory preset sets the synth and the effects. It leaves the master volume, your one-shots and the ambience alone. Changing preset stops the notes playing and clears the previous sound's echoes, to avoid stray noises.</p>
+      </div>
+    </section>
+
+    <section class="chap" id="creation">
+      <h2 lang="fr">Vos créations</h2><h2 lang="en">Your creations</h2>
+      <div lang="fr">
+        <p>Une création enregistre <strong>tout le son</strong> : oscillateurs, harmoniques, filtre, enveloppe, effets, ambiance, et les one-shots avec leurs samples et leurs réglages. Elle se recharge comme un preset.</p>
+        <dl class="controls">
+          <div><dt>Enregistrer</dt><dd>Cliquez sur <span class="ctl">create</span> en haut du sound core : le son est rangé sous le nom « creation 1 », « creation 2 »… Pour choisir le nom tout de suite, ouvrez les presets, tapez-le dans <em>name your sound</em>, puis cliquez sur <span class="ctl">create</span>.</dd></div>
+          <div><dt>Réutiliser</dt><dd>Presets, catégorie <em>creation</em>, cliquez sur le nom. La mention <em>one-shots</em> signale les créations qui contiennent des samples.</dd></div>
+          <div><dt>Renommer</dt><dd><span class="ctl">rename</span>, tapez le nouveau nom, puis <span class="ctl">OK</span> ou <kbd>Entrée</kbd>. <kbd>Échap</kbd> annule.</dd></div>
+          <div><dt>Supprimer</dt><dd><span class="ctl">delete</span>. Il n'y a pas d'annulation.</dd></div>
+        </dl>
+        <div class="bubble warn"><b>La place est limitée</b><p>Une création avec deux samples de 3 secondes occupe environ 0,8 Mo. Au-delà d'une demi-douzaine, le message « storage is full » demande d'en supprimer une.</p></div>
+      </div>
+      <div lang="en">
+        <p>A creation saves <strong>the whole sound</strong>: oscillators, harmonics, filter, envelope, effects, ambience, and the one-shots with their samples and settings. It loads back like a preset.</p>
+        <dl class="controls">
+          <div><dt>Save</dt><dd>Click <span class="ctl">create</span> at the top of the sound core: the sound is stored as "creation 1", "creation 2"… To name it right away, open the presets, type the name in <em>name your sound</em>, then click <span class="ctl">create</span>.</dd></div>
+          <div><dt>Reuse</dt><dd>Presets, <em>creation</em> category, click the name. The <em>one-shots</em> tag marks creations that include samples.</dd></div>
+          <div><dt>Rename</dt><dd><span class="ctl">rename</span>, type the new name, then <span class="ctl">OK</span> or <kbd>Enter</kbd>. <kbd>Esc</kbd> cancels.</dd></div>
+          <div><dt>Delete</dt><dd><span class="ctl">delete</span>. There is no undo.</dd></div>
+        </dl>
+        <div class="bubble warn"><b>Space is limited</b><p>A creation with two 3-second samples takes about 0.8 MB. Past half a dozen, the "storage is full" message asks you to delete one.</p></div>
+      </div>
+    </section>
+
+    <section class="chap" id="oneshots">
+      <h2 lang="fr">One-shots</h2><h2 lang="en">One-shots</h2>
+      <div lang="fr">
+        <p>Deux pistes, <strong>A</strong> et <strong>B</strong>, accueillent chacune un sample : kick, snap, voix, bruitage… À chaque note, les samples chargés se déclenchent et suivent la hauteur jouée. Le <strong>do central (do4, note MIDI 60)</strong> les joue à leur hauteur d'origine.</p>
+        <h3>Charger un sample</h3>
+        <p>Glissez un fichier sur une piste, ou cliquez sur une piste vide pour en choisir un. WAV, MP3, AIFF, FLAC et OGG sont acceptés ; le sample est passé en mono et limité à 3 secondes. Attendez la mention <strong>ready</strong> avant de jouer. <span class="ctl">remove</span> retire le sample.</p>
+        <h3>Layer ou independent</h3>
+        <dl class="controls">
+          <div><dt>independent</dt><dd>Dès qu'un sample est chargé, le synthé se tait : on n'entend que les one-shots, sans filtre ni effets. Sans sample, le synthé joue normalement.</dd></div>
+          <div><dt>layer</dt><dd>Le synthé et les one-shots jouent ensemble ; les samples passent par le filtre, l'enveloppe et les effets du synthé.</dd></div>
+        </dl>
+        <h3>Réglages de chaque piste</h3>
+        <p>Glissez une piste vers le haut ou le bas pour son niveau. Sous chaque piste :</p>
+        <dl class="controls">
+          <div><dt>attack<small>1 ms à 2 s</small></dt><dd>Temps de montée du son.</dd></div>
+          <div><dt>envelope<small>jusqu'à « full »</small></dt><dd>Fondu pendant que le sample joue ; au maximum, le sample reste intact.</dd></div>
+          <div><dt>release<small>jusqu'à « full »</small></dt><dd>Extinction après le relâchement de la note ; au maximum, le sample va jusqu'au bout.</dd></div>
+        </dl>
+        <p>Ces trois réglages agissent en mode independent. En mode layer, c'est l'enveloppe du synthé qui s'applique.</p>
+      </div>
+      <div lang="en">
+        <p>Two tracks, <strong>A</strong> and <strong>B</strong>, each hold one sample: kick, snap, vocal, foley… On every note, loaded samples trigger and follow the played pitch. <strong>Middle C (C4, MIDI note 60)</strong> plays them at their original pitch.</p>
+        <h3>Loading a sample</h3>
+        <p>Drop a file on a track, or click an empty track to pick one. WAV, MP3, AIFF, FLAC and OGG are accepted; the sample is turned mono and limited to 3 seconds. Wait for <strong>ready</strong> before playing. <span class="ctl">remove</span> unloads the sample.</p>
+        <h3>Layer or independent</h3>
+        <dl class="controls">
+          <div><dt>independent</dt><dd>As soon as a sample is loaded, the synth goes quiet: you only hear the one-shots, with no filter or effects. With no sample, the synth plays normally.</dd></div>
+          <div><dt>layer</dt><dd>Synth and one-shots play together; the samples go through the synth's filter, envelope and effects.</dd></div>
+        </dl>
+        <h3>Per-track controls</h3>
+        <p>Drag a track up or down for its level. Under each track:</p>
+        <dl class="controls">
+          <div><dt>attack<small>1 ms to 2 s</small></dt><dd>Fade-in time.</dd></div>
+          <div><dt>envelope<small>up to "full"</small></dt><dd>Fade while the sample plays; at maximum, the sample is untouched.</dd></div>
+          <div><dt>release<small>up to "full"</small></dt><dd>Fade-out after the note is released; at maximum, the sample plays to the end.</dd></div>
+        </dl>
+        <p>These three controls work in independent mode. In layer mode, the synth envelope applies instead.</p>
+      </div>
+    </section>
+
+    <section class="chap" id="ambiance">
+      <h2 lang="fr">Ambiance</h2><h2 lang="en">Ambience</h2>
+      <div lang="fr">
+        <p>Un fond sonore généré en continu, même sans note jouée. Choisissez wind, train, water, forest ou birds, puis montez <span class="ctl">level</span>, qui démarre à zéro. Sa course est progressive : la moitié donne un quart du volume.</p>
+        <h3>sync bpm</h3>
+        <p>Cochée par défaut, la case cale l'ambiance sur le tempo de FL Studio, et sur la position de lecture quand le morceau joue. Décochée, l'ambiance évolue librement.</p>
+        <dl class="controls">
+          <div><dt>wind</dt><dd>Les rafales suivent des cycles de 2 et 4 mesures.</dd></div>
+          <div><dt>train</dt><dd>Le « ta-dam » des rails tombe sur chaque temps.</dd></div>
+          <div><dt>water</dt><dd>Les gouttes tombent sur les doubles croches.</dd></div>
+          <div><dt>forest, birds</dt><dd>Les phrases d'oiseaux démarrent sur les temps.</dd></div>
+        </dl>
+      </div>
+      <div lang="en">
+        <p>A background sound that runs continuously, even with no note playing. Pick wind, train, water, forest or birds, then raise <span class="ctl">level</span>, which starts at zero. Its travel is progressive: halfway gives a quarter of the volume.</p>
+        <h3>sync bpm</h3>
+        <p>Ticked by default, it locks the ambience to FL Studio's tempo, and to the playback position while the song plays. Unticked, the ambience runs freely.</p>
+        <dl class="controls">
+          <div><dt>wind</dt><dd>Gusts follow 2- and 4-bar cycles.</dd></div>
+          <div><dt>train</dt><dd>The rail "da-dum" lands on every beat.</dd></div>
+          <div><dt>water</dt><dd>Drops fall on sixteenth notes.</dd></div>
+          <div><dt>forest, birds</dt><dd>Bird phrases start on the beats.</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="chap" id="filtre">
+      <h2 lang="fr">Filtre et enveloppe</h2><h2 lang="en">Filter and envelope</h2>
+      <dl class="controls" lang="fr">
+        <div><dt>low / high</dt><dd>Passe-bas, qui garde les graves, ou passe-haut, qui garde les aigus.</dd></div>
+        <div><dt>cutoff<small>20 Hz à 18 kHz</small></dt><dd>Fréquence de coupure.</dd></div>
+        <div><dt>resonance</dt><dd>Accentue la zone de coupure, jusqu'au sifflement.</dd></div>
+        <div><dt>envelope<small>panneau filter</small></dt><dd>Ouvre le filtre au début de chaque note, pour un effet « pluck ».</dd></div>
+        <div><dt>attack</dt><dd>Temps de montée de chaque note.</dd></div>
+        <div><dt>decay</dt><dd>Temps pour descendre jusqu'au niveau de maintien.</dd></div>
+        <div><dt>sustain</dt><dd>Niveau tenu tant que la note est enfoncée.</dd></div>
+        <div><dt>release</dt><dd>Temps d'extinction après le relâchement.</dd></div>
+      </dl>
+      <dl class="controls" lang="en">
+        <div><dt>low / high</dt><dd>Low-pass, which keeps the lows, or high-pass, which keeps the highs.</dd></div>
+        <div><dt>cutoff<small>20 Hz to 18 kHz</small></dt><dd>Cutoff frequency.</dd></div>
+        <div><dt>resonance</dt><dd>Emphasises the cutoff region, up to a whistle.</dd></div>
+        <div><dt>envelope<small>filter panel</small></dt><dd>Opens the filter at the start of each note, for a "pluck" effect.</dd></div>
+        <div><dt>attack</dt><dd>How long each note takes to rise.</dd></div>
+        <div><dt>decay</dt><dd>How long it takes to fall to the sustain level.</dd></div>
+        <div><dt>sustain</dt><dd>Level held while the note is down.</dd></div>
+        <div><dt>release</dt><dd>Fade-out time after release.</dd></div>
+      </dl>
+    </section>
+
+    <section class="chap" id="effets">
+      <h2 lang="fr">Effets</h2><h2 lang="en">Effects</h2>
+      <p lang="fr">Chaque écran de la barre noire se glisse vers le haut ou le bas ; le chiffre en haut à droite indique la quantité.</p>
+      <p lang="en">Drag each screen in the black bay up or down; the number at its top right shows the amount.</p>
+      <dl class="controls" lang="fr">
+        <div><dt>reverb</dt><dd>Espace et queue de réverbération, en stéréo.</dd></div>
+        <div><dt>delay</dt><dd>Échos répétés, adoucis à chaque passage.</dd></div>
+        <div><dt>chorus</dt><dd>Élargit et épaissit le son en stéréo.</dd></div>
+        <div><dt>flanger</dt><dd>Balayage métallique façon avion à réaction.</dd></div>
+        <div><dt>vinyl</dt><dd>Souffle et craquements de disque. Très discret en dessous de 30 %.</dd></div>
+        <div><dt>ear candy</dt><dd>Petits événements sonores aléatoires autour des notes jouées.</dd></div>
+        <div><dt>chaos</dt><dd>Dose de hasard : ear candy plus imprévisible, matière plus agitée.</dd></div>
+        <div><dt>character</dt><dd>Saturation et grain.</dd></div>
+        <div><dt>effects</dt><dd>Interrupteur général : coupe ou rallume tous les effets de la barre d'un coup.</dd></div>
+      </dl>
+      <dl class="controls" lang="en">
+        <div><dt>reverb</dt><dd>Space and reverb tail, in stereo.</dd></div>
+        <div><dt>delay</dt><dd>Repeating echoes, softened on each pass.</dd></div>
+        <div><dt>chorus</dt><dd>Widens and thickens the sound in stereo.</dd></div>
+        <div><dt>flanger</dt><dd>Metallic jet-plane sweep.</dd></div>
+        <div><dt>vinyl</dt><dd>Record hiss and crackle. Very subtle below 30%.</dd></div>
+        <div><dt>ear candy</dt><dd>Small random sound events around the notes you play.</dd></div>
+        <div><dt>chaos</dt><dd>Amount of randomness: wilder ear candy, livelier matter.</dd></div>
+        <div><dt>character</dt><dd>Saturation and grit.</dd></div>
+        <div><dt>effects</dt><dd>Master switch: turns every effect in the bay off or on at once.</dd></div>
+      </dl>
+    </section>
+
+    <section class="chap" id="maj">
+      <h2 lang="fr">Mettre à jour et désinstaller</h2><h2 lang="en">Updating and uninstalling</h2>
+      <div lang="fr">
+        <h3>Mettre à jour depuis ZIMA</h3>
+        <p>Quand une nouvelle version sort, un bandeau noir l'annonce en haut de la fenêtre de ZIMA, quelques secondes après son ouverture. Il faut être connecté à Internet.</p>
+        <ol class="flow">
+          <li><b>Cliquer sur update</b><p>ZIMA télécharge la nouvelle version. <span class="ctl">later</span> masque le bandeau jusqu'à la version suivante.</p></li>
+          <li><b>Autoriser l'installation</b><p>Windows demande l'autorisation d'apporter des modifications : répondez <span class="ctl">Oui</span>. L'installeur se met à jour tout seul, sans autre question.</p></li>
+          <li><b>Redémarrer FL Studio</b><p>Enregistrez votre projet, fermez FL Studio puis rouvrez-le : tant qu'il reste ouvert, il garde l'ancienne version en mémoire. Vos réglages, samples et créations sont conservés. Vérifiez le numéro sous le logo.</p></li>
+        </ol>
+        <p>Sans Internet, ou si le bandeau n'apparaît pas, téléchargez le nouveau <code>ZIMA-Setup.exe</code> et lancez-le : les étapes sont les mêmes qu'à l'installation.</p>
+        <h3>Désinstaller</h3>
+        <ol class="flow">
+          <li><b>Fermer FL Studio</b></li>
+          <li><b>Ouvrir les applications installées</b><p><span class="ctl">Paramètres</span> &gt; <span class="ctl">Applications</span> &gt; <span class="ctl">Applications installées</span>.</p></li>
+          <li><b>Désinstaller ZIMA</b><p>Cherchez ZIMA, cliquez sur <span class="ctl">…</span> puis <span class="ctl">Désinstaller</span>, et confirmez. Le plugin et le dossier <code>C:\Program Files\ZIMA</code> sont supprimés ; les projets qui utilisaient ZIMA l'afficheront comme manquant.</p></li>
+        </ol>
+      </div>
+      <div lang="en">
+        <h3>Updating from ZIMA</h3>
+        <p>When a new version is out, a black banner announces it at the top of the ZIMA window, a few seconds after it opens. You need to be online.</p>
+        <ol class="flow">
+          <li><b>Click update</b><p>ZIMA downloads the new version. <span class="ctl">later</span> hides the banner until the next version.</p></li>
+          <li><b>Allow the installation</b><p>Windows asks for permission to make changes: answer <span class="ctl">Yes</span>. The installer updates ZIMA on its own, with no further questions.</p></li>
+          <li><b>Restart FL Studio</b><p>Save your project, close FL Studio and open it again: while it stays open, it keeps the old version in memory. Your settings, samples and creations are kept. Check the number under the logo.</p></li>
+        </ol>
+        <p>Offline, or if the banner doesn't show, download the new <code>ZIMA-Setup.exe</code> and run it: the steps are the same as the first install.</p>
+        <h3>Uninstalling</h3>
+        <ol class="flow">
+          <li><b>Close FL Studio</b></li>
+          <li><b>Open installed apps</b><p><span class="ctl">Settings</span> &gt; <span class="ctl">Apps</span> &gt; <span class="ctl">Installed apps</span>.</p></li>
+          <li><b>Uninstall ZIMA</b><p>Find ZIMA, click <span class="ctl">…</span> then <span class="ctl">Uninstall</span>, and confirm. The plugin and the <code>C:\Program Files\ZIMA</code> folder are removed; projects that used ZIMA will show it as missing.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="chap" id="depannage">
+      <h2 lang="fr">Dépannage</h2><h2 lang="en">Troubleshooting</h2>
+      <div class="faq" lang="fr">
+        <div><h4>ZIMA n'apparaît pas dans FL Studio</h4><p>Relancez la recherche des plugins (<span class="ctl">Options</span> &gt; <span class="ctl">Manage plugins</span>). Si besoin, relancez l'installeur.</p></div>
+        <div><h4>Une note reste tenue</h4><p>Cliquez sur <span class="ctl">stop</span>, à gauche du clavier à l'écran.</p></div>
+        <div><h4>Changer de preset ne change rien</h4><p>Des one-shots sont chargés en mode independent : le synthé est coupé et on n'entend que les samples. Passez en layer ou retirez les samples.</p></div>
+        <div><h4>Un one-shot ne s'entend pas</h4><p>Attendez <strong>ready</strong>, puis vérifiez le niveau de la piste et le mode, layer ou independent.</p></div>
+        <div><h4>Un one-shot est coupé</h4><p>Les samples sont limités à 3 secondes ; un fichier plus long est coupé. Utilisez un sample plus court.</p></div>
+        <div><h4>Le clavier de l'ordinateur ne joue pas</h4><p>Cliquez dans la fenêtre de ZIMA, hors d'un champ de saisie. Certaines touches, comme <kbd>1</kbd>, <kbd>4</kbd>, <kbd>8</kbd>, <kbd>Q</kbd>, <kbd>F</kbd> ou <kbd>K</kbd>, sont muettes par construction : voir le schéma du clavier.</p></div>
+        <div><h4>Vinyle ou ambiance inaudibles</h4><p>Leurs réglages sont progressifs : en dessous de 30 %, ils restent très discrets. Montez-les davantage.</p></div>
+        <div><h4>Aucun effet ne s'entend</h4><p>Vérifiez que l'interrupteur <span class="ctl">effects</span> est sur on.</p></div>
+        <div><h4>Impossible de taper un nom</h4><p>Cliquez dans le champ avant de taper. Sinon, le nom automatique s'applique.</p></div>
+      </div>
+      <div class="faq" lang="en">
+        <div><h4>ZIMA doesn't show up in FL Studio</h4><p>Run the plugin scan again (<span class="ctl">Options</span> &gt; <span class="ctl">Manage plugins</span>). If needed, run the installer again.</p></div>
+        <div><h4>A note keeps playing</h4><p>Click <span class="ctl">stop</span>, left of the on-screen keyboard.</p></div>
+        <div><h4>Changing preset changes nothing</h4><p>One-shots are loaded in independent mode: the synth is muted and only the samples play. Switch to layer or remove the samples.</p></div>
+        <div><h4>A one-shot is silent</h4><p>Wait for <strong>ready</strong>, then check the track level and the mode, layer or independent.</p></div>
+        <div><h4>A one-shot is cut short</h4><p>Samples are limited to 3 seconds; a longer file is cut. Use a shorter sample.</p></div>
+        <div><h4>The computer keyboard doesn't play</h4><p>Click inside the ZIMA window, outside any text field. Some keys, such as <kbd>1</kbd>, <kbd>4</kbd>, <kbd>8</kbd>, <kbd>A</kbd>, <kbd>F</kbd> or <kbd>K</kbd>, are silent by design: see the keyboard diagram.</p></div>
+        <div><h4>Vinyl or ambience inaudible</h4><p>Their controls are progressive: below 30% they stay very subtle. Turn them up further.</p></div>
+        <div><h4>No effect is heard</h4><p>Check that the <span class="ctl">effects</span> switch is on.</p></div>
+        <div><h4>Can't type a name</h4><p>Click inside the field before typing. Otherwise the automatic name is used.</p></div>
+      </div>
+      <h3 lang="fr">Panneau de diagnostic</h3><h3 lang="en">Diagnostic panel</h3>
+      <p lang="fr">Un clic sur le logo ZIMA ouvre un panneau qui montre ce que le moteur reçoit réellement : version, valeurs des réglages, état des one-shots, tempo reçu de FL Studio. En cas de problème, envoyez une capture de ce panneau ; un clic dessus le referme.</p>
+      <p lang="en">Click the ZIMA logo to open a panel showing what the engine actually receives: version, control values, one-shot state, tempo from FL Studio. If something goes wrong, send a screenshot of it; click it to close.</p>
+    </section>
+
+    <section class="chap" id="limites">
+      <h2 lang="fr">Limites connues</h2><h2 lang="en">Known limits</h2>
+      <ul class="plain" lang="fr">
+        <li>Windows 10 et 11 en 64 bits, au format VST3 ; pas encore de version Mac.</li>
+        <li>One-shots : un sample par piste, en mono, 3 secondes au maximum.</li>
+        <li>Huit notes au maximum en même temps.</li>
+        <li>Les créations sont gardées dans la mémoire du plugin et dans le projet ; leur passage d'un projet à l'autre reste à confirmer.</li>
+        <li>Les ambiances sont synthétisées : le vent et l'eau sont plus réalistes que le train et les oiseaux.</li>
+      </ul>
+      <ul class="plain" lang="en">
+        <li>64-bit Windows 10 and 11, VST3 format; no Mac version yet.</li>
+        <li>One-shots: one sample per track, mono, 3 seconds maximum.</li>
+        <li>Eight notes at once at most.</li>
+        <li>Creations are kept in the plugin's memory and in the project; whether they carry over between projects is still to be confirmed.</li>
+        <li>Ambiences are synthesised: wind and water sound more realistic than train and birds.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer class="wrap">
+  <svg class="mark" viewBox="0 0 120 34" aria-hidden="true"><path d="M5 7 H25 L5 27 H25"/><path d="M39 7 V27"/><path d="M53 27 V7 L65 21 L77 7 V27"/><path d="M91 27 L102 7 L113 27"/><circle cx="102" cy="23" r="3.4"/></svg>
+  <p lang="fr">Mode d'emploi de ZIMA, version 17.1.</p>
+  <p lang="en">ZIMA user manual, version 17.1.</p>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var buttons = Array.prototype.slice.call(document.querySelectorAll("[data-set-lang]"));
+  function setLang(lang) {
+    root.setAttribute("data-lang", lang);
+    root.setAttribute("lang", lang);
+    buttons.forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-set-lang") === lang ? "true" : "false"); });
+    try { localStorage.setItem("zimaManualLang", lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem("zimaManualLang"); } catch (e) {}
+  setLang(saved || ((navigator.language || "fr").toLowerCase().indexOf("fr") === 0 ? "fr" : "en"));
+  buttons.forEach(function (b) { b.addEventListener("click", function () { setLang(b.getAttribute("data-set-lang")); }); });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        links.forEach(function (a) { a.classList.toggle("here", a.getAttribute("href") === "#" + e.target.id); });
+      });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    document.querySelectorAll("section.chap").forEach(function (s) { io.observe(s); });
+  }
+
+  var NS = "http://www.w3.org/2000/svg";
+  function row(groupId, y, keys) {
+    var g = document.getElementById(groupId);
+    keys.forEach(function (k, i) {
+      var x = 76 + i * 37.5;
+      var r = document.createElementNS(NS, "rect");
+      r.setAttribute("class", "k" + (k[2] ? " blk" : ""));
+      r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("width", 33); r.setAttribute("height", 50); r.setAttribute("rx", 9);
+      g.appendChild(r);
+      var t1 = document.createElementNS(NS, "text");
+      t1.setAttribute("x", x + 16.5); t1.setAttribute("y", y + 22); t1.setAttribute("text-anchor", "middle");
+      if (k[2]) t1.setAttribute("class", "on-dark");
+      t1.textContent = k[0]; g.appendChild(t1);
+      var t2 = document.createElementNS(NS, "text");
+      t2.setAttribute("x", x + 16.5); t2.setAttribute("y", y + 40); t2.setAttribute("text-anchor", "middle");
+      t2.setAttribute("style", "font-size:10.5px;opacity:.65");
+      if (k[2]) t2.setAttribute("class", "on-dark");
+      t2.textContent = k[1]; g.appendChild(t2);
+    });
+  }
+  row("row-up-fr", 26, [["A","do4"],["é","do♯",1],["Z","ré4"],["\"","ré♯",1],["E","mi4"],["R","fa4"],["(","fa♯",1],["T","sol4"],["-","sol♯",1],["Y","la4"],["è","la♯",1],["U","si4"],["I","do5"],["ç","do♯",1],["O","ré5"],["à","ré♯",1],["P","mi5"]]);
+  row("row-low-fr", 132, [["W","do3"],["S","do♯",1],["X","ré3"],["D","ré♯",1],["C","mi3"],["V","fa3"],["G","fa♯",1],["B","sol3"],["H","sol♯",1],["N","la3"],["J","la♯",1],[",","si3"],[";","do4"],["L","do♯",1],[":","ré4"],["M","ré♯",1],["!","mi4"]]);
+  row("row-up", 26, [["Q","C4"],["2","C#",1],["W","D4"],["3","D#",1],["E","E4"],["R","F4"],["5","F#",1],["T","G4"],["6","G#",1],["Y","A4"],["7","A#",1],["U","B4"],["I","C5"],["9","C#",1],["O","D5"],["0","D#",1],["P","E5"]]);
+  row("row-low", 132, [["Z","C3"],["S","C#",1],["X","D3"],["D","D#",1],["C","E3"],["V","F3"],["G","F#",1],["B","G3"],["H","G#",1],["N","A3"],["J","A#",1],["M","B3"],[",","C4"],["L","C#",1],[".","D4"],[";","D#",1],["/","E4"]]);
+})();
+</script>
+</body>
+</html>
